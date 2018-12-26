@@ -1,0 +1,22 @@
+{
+  "name": "@shieldsbetter/sejr",
+  "version": "0.0.1",
+  "description": "Disciplined representation of non-JSON data in JSON.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "clone": "^2.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "json",
+    "serialization"
+  ],
+  "author": "Hampton Smith",
+  "license": "ISC"
+}
