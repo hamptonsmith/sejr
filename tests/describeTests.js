@@ -182,14 +182,28 @@ const tests = [
                 }
             }
         }
+    },
+    {
+        name: 'type with no definition generates error',
+        typeof: (i, superTypeof) => i === 'foo' ? 'foo' : superTypeof(i),
+        input: 'foo',
+        errorMessageContains: 'definition'
     }
 ];
+
+const onlyRun = undefined;
 
 const assert = require('assert');
 const sejrFactory = require('../index');
 
 try {
     tests.forEach(test => {
+        if (typeof onlyRun !== 'undefined') {
+            if (onlyRun.indexOf(test.name) === -1) {
+                return;
+            }
+        }
+    
         const options = {
             types: test.types || {}
         };
@@ -198,10 +212,40 @@ try {
         }
         
         const sejr = sejrFactory({ options: options });
-        const output = sejr.describe(test.input);
         
-        assert.deepEqual(output, test.output, 
-                `Incorrect output from test "${test.name}".`);
+        try {
+            const output = sejr.describe(test.input);
+            
+            if (test.errorMessageContains) {
+                throw new assert.AssertionError({
+                    operator: 'errorMessageContains',
+                    message: `Expected an error with message containing ` +
+                            `"${test.errorMessageContains}", but instead ` +
+                            `succeeded.`,
+                    actual: output
+                });
+            }
+            
+            assert.deepEqual(output, test.output, 
+                    `Incorrect output from test "${test.name}".`);
+        }
+        catch (e)  {
+            if (!test.errorMessageContains ||
+                    e.operator === 'errorMessageContains') {
+                e.message = `Error in test ${test.name}: ${e.message}`;
+                
+                throw e;
+            }
+            
+            if (!e.message.includes(test.errorMessageContains)) {
+                throw new assert.AssertionError({
+                    operator: 'errorMessageContains',
+                    message: `Unexpected error message.`,
+                    expected: test.errorMessageContains,
+                    actual: e.message
+                });
+            }
+        }
     });
 }
 catch (e) {

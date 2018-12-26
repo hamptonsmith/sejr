@@ -35,6 +35,7 @@ module.exports = (input) => {
         object: {
             describe: o => o,
             realize: {
+                fromNull: n => n,
                 fromObject: o => o
             }
         }
@@ -53,10 +54,9 @@ module.exports = (input) => {
 };
 
 function describe(data, options) {
-    let typeofData;        
     let description;
     
-    typeofData = options.typeof(data, defaultTypeof);
+    const typeofData = options.typeof(data, defaultTypeof);
     
     const typeDef = options.types[typeofData];
     if (!typeDef) {
@@ -163,85 +163,124 @@ function describe(data, options) {
     
     return result;
 }
-/*
-function realize(s, options) {
-    const typeofS = typeof s;
+
+function realize(description, options) {
+    const typeofDescription = typeof description;
+    let result;
     
-    switch (typeofS) {
+    switch (typeofDescription) {
         case 'boolean':
         case 'number':
         case 'string': {
-            return s;
+            result = description;
+            break;
         }
         case 'object': {
-            if (s === null) {
-                return s;
+            if (description === null) {
+                result = null;
             }
-            
-            let describedType;
-            let representation;
-            
-            if (Array.isArray(s)) {
-                describedType = 'array';
-                representation = s;
-            }
-            else if (s['@m']) {
-                describedType = s['@m'].t || 'object';
-                representation = s['@m'].d;
+            else if (Array.isArray(description)) {
+                result = new Array(description.length);
+                for (let i = 0; i < description.length; i++) {
+                    result[i] = realize(description[i], options);
+                }
             }
             else {
-                describedType = 'object';
-                representation = s;
-            }
-            
-            const copy = describedType === 'array' ?
-                    new Array(representation.length) : {};
-            
-            Object.keys(representation).forEach(k => {
-                copy[k] = realize(representation[k], options);
-            });
-            representation = copy;
-            
-            switch (describedType) {
-                case 'array':
-                case 'object': {
-                    break;
-                }
-                default: {
-                    const realizer = options.describers[describedType].realize;
-                    const superRealize = s => realize(s, options);
+                const descriptionKeys = Object.keys(description);
+                if (descriptionKeys.length === 1 &&
+                        descriptionKeys[0] === '@m') {
+                    const escapedDescription = description['@m'];
+                    const describedType = escapedDescription.t || 'object';
+                    const typeDef = options.types[describedType];
                     
-                    let subRealizer;
-                    switch (typeof representation) {
+                    if (!typeDef) {
+                        throw new Error(`No type definition provided for ` +
+                                `type: "${describedType}".`);
+                    }
+                    
+                    const realizers = typeDef.realize;
+                    
+                    const nestedDescription = escapedDescription.d;
+                    const primitiveTypeofDesc = typeof nestedDescription;
+                    switch (primitiveTypeofDesc) {
                         case 'boolean': {
-                            
-                            return realizer.fromBoolean(
-                                    representation, superRealize);
+                            result = realizers.fromBoolean(nestedDescription);
+                            break;
                         }
                         case 'number': {
-                            return realizer.fromNumber(
-                                    representation, superRealize);
+                            result = realizers.fromNumber(nestedDescription);
+                            break;
                         }
                         case 'string': {
-                            return realizer.fromString(representation, superR
+                            result = realizers.fromString(nestedDescription);
+                            break;
+                        }
+                        case 'undefined': {
+                            result = realizers.fromUndefined();
+                            break;
+                        }
+                        case 'object': {
+                            let realizedNestedDescription;
+                            if (describedType === 'object') {
+                                realizedNestedDescription = realizeObject(
+                                        nestedDescription, options);
+                            }
+                            else {
+                                realizedNestedDescription =
+                                        realize(nestedDescription, options);
+                            }
+                        
+                            if (realizedNestedDescription === null) {
+                                result = realizers.fromNull(null);
+                            }
+                            else if (Array.isArray(nestedDescription)) {
+                                result = realizers.fromArray(
+                                        realizedNestedDescription);
+                            }
+                            else {
+                                result = realizers.fromObject(
+                                        realizedNestedDescription);
+                            }
+                            break;
+                        }
+                        default: {
+                            throw new Error(`Description nested in meta node ` +
+                                    `must be absent or a JSON-compatible ` +
+                                    `type, but found value ` +
+                                    `"${nestedDescription}" of type ` +
+                                    `"${primitiveTypeofDesc}".`);
                         }
                     }
-                
-                    representation = 
-                            options.describers[describedType].realize(
-                                    representation,
-                                    s => realize(s, options));
+                }
+                else {
+                    result = realizeObject(description, options);
                 }
             }
-            
-            return representation;
-        }
-        default: {
-            throw new Error('Invalid build argument type: ' + typeofS);
+            break;
         }
     }
+    
+    return result;
 }
-*/
+
+function realizeObject(input, options) {
+    if (typeof input !== 'object') {
+        throw new Error();
+    }
+    
+    let result;
+    if (input === null) {
+        result = null;
+    }
+    else {
+        result = {};
+        Object.keys(input).forEach(key => {
+            result[key] = realize(input[key], options);
+        });
+    }
+    
+    return result;
+}
 
 function defaultTypeof(d) {
     const typeofD = typeof d;
