@@ -191,78 +191,28 @@ const tests = [
     }
 ];
 
-const onlyRun = undefined;
-
-const assert = require('assert');
 const sejrFactory = require('../index');
 
-try {
-    tests.forEach(test => {
-        if (typeof onlyRun !== 'undefined') {
-            if (onlyRun.indexOf(test.name) === -1) {
-                return;
-            }
-        }
+module.exports = {
+    cases: tests,
+    runner: (test, skip) => {
+        let result;
     
-        const options = {
-            types: test.types || {}
-        };
-        if (test.typeof) {
-            options.typeof = test.typeof;
+        if (typeof onlyRun !== 'undefined' && 
+                onlyRun.indexOf(test.name) === -1) {
+            skip();
+        }
+        else {
+            const options = {
+                types: test.types || {}
+            };
+            if (test.typeof) {
+                options.typeof = test.typeof;
+            }
+            
+            result = sejrFactory({ options: options }).describe(test.input);
         }
         
-        const sejr = sejrFactory({ options: options });
-        
-        try {
-            const output = sejr.describe(test.input);
-            
-            if (test.errorMessageContains) {
-                throw new assert.AssertionError({
-                    operator: 'errorMessageContains',
-                    message: `Expected an error with message containing ` +
-                            `"${test.errorMessageContains}", but instead ` +
-                            `succeeded.`,
-                    actual: output
-                });
-            }
-            
-            assert.deepEqual(output, test.output, 
-                    `Incorrect output from test "${test.name}".`);
-        }
-        catch (e)  {
-            if (!test.errorMessageContains ||
-                    e.operator === 'errorMessageContains') {
-                e.message = `Error in test ${test.name}: ${e.message}`;
-                
-                throw e;
-            }
-            
-            if (!e.message.includes(test.errorMessageContains)) {
-                throw new assert.AssertionError({
-                    operator: 'errorMessageContains',
-                    message: `Unexpected error message.`,
-                    expected: test.errorMessageContains,
-                    actual: e.message
-                });
-            }
-        }
-    });
-}
-catch (e) {
-    if (e.code !== 'ERR_ASSERTION') {
-        throw e;
+        return result;
     }
-
-    console.log(e.message);
-    if (e.expected) {
-        console.log('Expected:');
-        console.log(JSON.stringify(e.expected, null, 4));
-    }
-    if (e.actual) {
-        console.log('Found:');
-        console.log(JSON.stringify(e.actual, null, 4));
-    }
-    process.exit(1);
-}
-
-console.log('All tests passed.');
+};

@@ -292,80 +292,26 @@ const tests = [
     }
 ];
 
-const onlyRun = undefined;
-
 const assert = require('assert');
 const sejrFactory = require('../index');
 
-try {
-    tests.forEach(test => {
-        if (typeof onlyRun !== 'undefined') {
-            if (onlyRun.indexOf(test.name) === -1) {
-                return;
-            }
-        }
+module.exports = {
+    cases: tests,
+    runner: (test, skip) => {
+        let result;
     
-        const options = {
-            types: test.types || {}
-        };
-        
-        const sejr = sejrFactory({ options: options });
-        
-        try {
-            const output = sejr.realize(test.input);
-            
-            if (test.errorMessageContains) {
-                throw new assert.AssertionError({
-                    operator: 'errorMessageContains',
-                    message: `Expected an error with message containing ` +
-                            `"${test.errorMessageContains}", but instead ` +
-                            `succeeded.`,
-                    actual: output
-                });
-            }
-            
-            assert.deepEqual(output, test.output, 'Incorrect output.');
+        if (typeof onlyRun !== 'undefined' &&
+                onlyRun.indexOf(test.name) === -1) {
+            skip();
         }
-        catch (e)  {
-            e.sourceTest = test.name;
-        
-            if (e.code === 'ERR_ASSERTION') {
-                throw e;
-            }
-        
-            if (!test.errorMessageContains) {
-                e.message = `Error in test ${test.name}: ${e.message}`;
-                
-                throw e;
-            }
+        else {
+            const options = {
+                types: test.types || {}
+            };
             
-            if (!e.message.includes(test.errorMessageContains)) {
-                throw new assert.AssertionError({
-                    operator: 'errorMessageContains',
-                    message: `Unexpected error message.`,
-                    expected: test.errorMessageContains,
-                    actual: e.message,
-                });
-            }
+            result = sejrFactory({ options: options }).realize(test.input);
         }
-    });
-}
-catch (e) {
-    if (e.code !== 'ERR_ASSERTION') {
-        throw e;
+        
+        return result;
     }
-
-    console.log(`Test ${e.sourceTest} failed:`);
-    console.log(e.message);
-    if (e.expected) {
-        console.log('Expected:');
-        console.log(JSON.stringify(e.expected, null, 4));
-    }
-    if (e.actual) {
-        console.log('Found:');
-        console.log(JSON.stringify(e.actual, null, 4));
-    }
-    process.exit(1);
-}
-
-console.log('All tests passed.');
+};
