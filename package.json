@@ -1,6 +1,6 @@
 {
   "name": "@shieldsbetter/sejr",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Disciplined representation of non-JSON data in JSON.",
   "main": "index.js",
   "dependencies": {

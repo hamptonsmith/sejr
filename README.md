@@ -96,10 +96,12 @@ Available options are:
       definitions.  It is an error to include a definition for any built-in
       client type.  Each client type definition is itself a map with the
       following required entries:
-    * `describe` - a function from a javascript value of the given client type to a
-          description of that value.  The returned description may be any value
-          that itself can be described by `sejr.describe()`.  Take care not to
-          introduce cyclic description dependencies!
+    * `describe` - a function from a javascript value of the given client type
+          to a description of that value.  The returned description may be
+          `undefined` to indicate that no description is necessary (for 
+          singleton types), or any value that itself can be described by
+          `sejr.describe()`.  Take care not to introduce cyclic description
+          dependencies!
     * `realize` - a map of _realization functions_ which take as their sole
           argument a description as produced by this client type's corresponding
           `describe()` function and return the described client javascript

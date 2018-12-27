@@ -120,6 +120,7 @@ function describe(data, options) {
             }
             break;
         }
+        case 'undefined':
         case 'object': {
             if (dataClientTypeName === 'object') {
                 if (untaggedDescription === null) {
@@ -163,7 +164,15 @@ function describe(data, options) {
 function buildDescription(dataClientTypeName, data, options) {
     const dataClientTypeDef = getTypeDef(options, dataClientTypeName);
     let description = dataClientTypeDef.describe(data);
+
+    if (typeof description !== 'undefined') {
+        description = describeProvidedDescription(description, options);
+    }
     
+    return description;
+}
+
+function describeProvidedDescription(description, options) {
     const descriptionClientType =
             options.clientType(description, defaultTypeof);
     switch (descriptionClientType) {

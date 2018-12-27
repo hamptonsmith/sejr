@@ -286,6 +286,22 @@ const tests = [
         output: 'bar'
     },
     {
+        name: 'undefined description',
+        typeDefinitions: {
+            foo: {
+                realize: {
+                    fromUndefined: () => undefined
+                }
+            }
+        },
+        input: {
+            bar: { '@m': { t: 'foo' } }
+        },
+        output: {
+            bar: undefined
+        }
+    },
+    {
         name: 'type with no definition generates error',
         input: { '@m': { t: 'foo' } },
         errorMessageContains: 'definition'

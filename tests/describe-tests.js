@@ -184,6 +184,21 @@ const tests = [
         }
     },
     {
+        name: 'undefined description',
+        clientType: (i, dfn) => i === 'foo' ? 'foo' : dfn(i),
+        typeDefinitions: {
+            foo: {
+                describe: () => undefined
+            }
+        },
+        input: {
+            bar: 'foo'
+        },
+        output: {
+            bar: { '@m': { t: 'foo' } }
+        }
+    },
+    {
         name: 'type with no definition generates error',
         clientType: (i, superTypeof) => i === 'foo' ? 'foo' : superTypeof(i),
         input: 'foo',
