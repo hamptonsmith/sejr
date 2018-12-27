@@ -49,29 +49,41 @@ function defaultTypeof(d) {
         }
     }
     else {
+        if (!isBuiltInClientType(typeofD)) {
+            throw new Error(
+                    `Cannot describe value "${d}" with type "${typeofD}".`);
+        }
+    
         result = typeofD;
     }
     
     return result;
 }
 
-module.exports = (input) => {
-    const options = clone(input.options || {});
-    options.typeof = options.typeof || ((i, superTypeof) => superTypeof(i));
-    options.types = options.types || {};
+module.exports = class {
+    constructor(options) {
+        this.options = clone(options || {});
+        this.options.clientType =
+                this.options.clientType || ((i, superTypeof) => superTypeof(i));
+        this.options.typeDefinitions = this.options.typeDefinitions || {};
     
-    Object.entries(builtInClientTypes).forEach(([typeName, definition]) => {
-        if (options.types[typeName]) {
-            throw new Error(`May not redefine built-in type "${typeName}".`);
-        }
-        
-        options.types[typeName] = definition;
-    });
+        Object.entries(builtInClientTypes).forEach(([typeName, definition]) => {
+            if (this.options.typeDefinitions[typeName]) {
+                throw new Error(
+                        `May not redefine built-in type "${typeName}".`);
+            }
+            
+            this.options.typeDefinitions[typeName] = definition;
+        });
+    }
 
-    return {
-        describe: d => describe(d, options),
-        realize: s => realize(s, options)
-    };
+    describe(d) {
+        return describe(d, this.options);
+    }
+    
+    realize(s) {
+        return realize(s, this.options);
+    }
 };
 
 // ####################
@@ -82,7 +94,7 @@ module.exports = (input) => {
  * Maps a client object, `data`, into a sejr object.  `data` is not modified.
  */
 function describe(data, options) {
-    const dataClientTypeName = options.typeof(data, defaultTypeof);
+    const dataClientTypeName = options.clientType(data, defaultTypeof);
     const description = buildDescription(dataClientTypeName, data, options);
     return toSejr(dataClientTypeName, description);
 }
@@ -152,7 +164,8 @@ function buildDescription(dataClientTypeName, data, options) {
     const dataClientTypeDef = getTypeDef(options, dataClientTypeName);
     let description = dataClientTypeDef.describe(data);
     
-    const descriptionClientType = options.typeof(description, defaultTypeof);
+    const descriptionClientType =
+            options.clientType(description, defaultTypeof);
     switch (descriptionClientType) {
         case 'boolean':
         case 'number':
@@ -373,7 +386,7 @@ function realizeBuiltInClientTypeDescription(typeName, description, options) {
 }
 
 function getTypeDef(options, typeName) {
-    const result = options.types[typeName];
+    const result = options.typeDefinitions[typeName];
     
     if (!result) {
         throw new Error(`No type definition provided for type: ${typeName}.`);

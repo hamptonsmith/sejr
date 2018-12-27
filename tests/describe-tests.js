@@ -36,8 +36,8 @@ const tests = [
     },
     {
         name: 'basic custom type',
-        typeof: (i, superTypeof) => i === 'foo' ? 'foo' : superTypeof(i),
-        types: {
+        clientType: (i, superTypeof) => i === 'foo' ? 'foo' : superTypeof(i),
+        typeDefinitions: {
             foo: {
                 describe: f => 'this is a foo'
             }
@@ -47,8 +47,8 @@ const tests = [
     },
     {
         name: 'basic custom type object nested',
-        typeof: (i, superTypeof) => i === 'foo' ? 'foo' : superTypeof(i),
-        types: {
+        clientType: (i, superTypeof) => i === 'foo' ? 'foo' : superTypeof(i),
+        typeDefinitions: {
             foo: {
                 describe: f => 'this is a foo'
             }
@@ -64,8 +64,8 @@ const tests = [
     },
     {
         name: 'basic custom type array nested',
-        typeof: (i, superTypeof) => i === 'foo' ? 'foo' : superTypeof(i),
-        types: {
+        clientType: (i, superTypeof) => i === 'foo' ? 'foo' : superTypeof(i),
+        typeDefinitions: {
             foo: {
                 describe: f => 'this is a foo'
             }
@@ -75,7 +75,7 @@ const tests = [
     },
     {
         name: 'object-described custom type',
-        typeof: (i, superTypeof) => {
+        clientType: (i, superTypeof) => {
             let result;
             
             if (i === 'foo') {
@@ -90,7 +90,7 @@ const tests = [
             
             return result;
         },
-        types: {
+        typeDefinitions: {
             foo: {
                 describe: f => 'this is a foo'
             },
@@ -114,7 +114,7 @@ const tests = [
     },
     {
         name: 'array-described custom type',
-        typeof: (i, superTypeof) => {
+        clientType: (i, superTypeof) => {
             let result;
             
             if (i === 'foo') {
@@ -129,7 +129,7 @@ const tests = [
             
             return result;
         },
-        types: {
+        typeDefinitions: {
             foo: {
                 describe: f => 'this is a foo'
             },
@@ -147,7 +147,7 @@ const tests = [
     },
     {
         name: 'custom-type-described custom type',
-        typeof: (i, superTypeof) => {
+        clientType: (i, superTypeof) => {
             let result;
             
             if (i === 'foo') {
@@ -162,7 +162,7 @@ const tests = [
             
             return result;
         },
-        types: {
+        typeDefinitions: {
             foo: {
                 describe: f => 'this is a foo'
             },
@@ -185,13 +185,13 @@ const tests = [
     },
     {
         name: 'type with no definition generates error',
-        typeof: (i, superTypeof) => i === 'foo' ? 'foo' : superTypeof(i),
+        clientType: (i, superTypeof) => i === 'foo' ? 'foo' : superTypeof(i),
         input: 'foo',
         errorMessageContains: 'definition'
     }
 ];
 
-const sejrFactory = require('../index');
+const Sejr = require('../index');
 
 module.exports = {
     cases: tests,
@@ -204,13 +204,13 @@ module.exports = {
         }
         else {
             const options = {
-                types: test.types || {}
+                typeDefinitions: test.typeDefinitions || {}
             };
-            if (test.typeof) {
-                options.typeof = test.typeof;
+            if (test.clientType) {
+                options.clientType = test.clientType;
             }
             
-            result = sejrFactory({ options: options }).describe(test.input);
+            result = new Sejr(options).describe(test.input);
         }
         
         return result;

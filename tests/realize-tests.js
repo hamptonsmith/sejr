@@ -36,7 +36,7 @@ const tests = [
     },
     {
         name: 'from boolean',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromBoolean: b => b
@@ -48,7 +48,7 @@ const tests = [
     },
     {
         name: 'from number',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromNumber: n => n
@@ -60,7 +60,7 @@ const tests = [
     },
     {
         name: 'from string',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromString: s => s
@@ -72,7 +72,7 @@ const tests = [
     },
     {
         name: 'from undefined',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromUndefined: () => 'bar'
@@ -84,7 +84,7 @@ const tests = [
     },
     {
         name: 'from null',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromNull: () => 'bar'
@@ -96,7 +96,7 @@ const tests = [
     },
     {
         name: 'from array',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromArray: a => a
@@ -108,7 +108,7 @@ const tests = [
     },
     {
         name: 'from object',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromObject: o => o
@@ -120,7 +120,7 @@ const tests = [
     },
     {
         name: 'basic custom type',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromString: s => {
@@ -138,7 +138,7 @@ const tests = [
     },
     {
         name: 'basic custom type object nested',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromString: s => {
@@ -162,7 +162,7 @@ const tests = [
     },
     {
         name: 'basic custom type array nested',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromString: s => {
@@ -180,7 +180,7 @@ const tests = [
     },
     {
         name: 'object-described custom type',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromString: s => {
@@ -216,7 +216,7 @@ const tests = [
     },
     {
         name: 'array-described custom type',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromString: s => {
@@ -249,7 +249,7 @@ const tests = [
     },
     {
         name: 'custom-type-described custom type',
-        types: {
+        typeDefinitions: {
             foo: {
                 realize: {
                     fromString: s => {
@@ -293,7 +293,7 @@ const tests = [
 ];
 
 const assert = require('assert');
-const sejrFactory = require('../index');
+const Sejr = require('../index');
 
 module.exports = {
     cases: tests,
@@ -306,10 +306,10 @@ module.exports = {
         }
         else {
             const options = {
-                types: test.types || {}
+                typeDefinitions: test.typeDefinitions || {}
             };
             
-            result = sejrFactory({ options: options }).realize(test.input);
+            result = new Sejr(options).realize(test.input);
         }
         
         return result;
