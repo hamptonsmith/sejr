@@ -52,7 +52,7 @@ const gameStateRepresentation = new Sejr({
         SpaceShip: {
             describe: s => { x: s.getX(), y: s.getY() },
             realize: {
-                fromObject: o => new Ship(o.x, o.y)
+                fromObject: o => new SpaceShip(o.x, o.y)
             }
         }
     }
