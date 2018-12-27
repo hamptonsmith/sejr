@@ -79,7 +79,6 @@ Available options are:
 
 * `clientType` - a function from `(value, builtInClientTypeFn)` to the string
       name of the client type.
-      
       The built-in client type function will return only the built-in client
       types: `array`, `boolean`, `number`, `object`, and `string`.  It is an
       error to return the client type `array` for values that are not accepted
@@ -87,7 +86,6 @@ Available options are:
       client type for values for which the native javescript `typeof` operator
       would not return the same name.  Clients should generally defer to
       `builtInClientTypeFn` to handle the built-in types.
-      
       Otherwise, it is allowable to return any string as a custom type name, so
       long as a key with that name appears in the `typeDefinitions` options
       field.
