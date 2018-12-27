@@ -166,7 +166,6 @@ javascript values.
         ```javascript
         sejr.realize({foo: 'bar', bazz: 'plugh'});  // -> { foo: 'bar', bazz: 'plugh' }
         ```
-        
       * Escape `sejr` objects represent javascript values interpretted from an
         optional _description_ by a pre-arranged semantic.  The `@m` key of an
         escape object must itself map to a _value specifier_ object.  If the
