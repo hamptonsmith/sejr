@@ -1,12 +1,16 @@
 {
   "name": "@shieldsbetter/sejr",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Disciplined representation of non-JSON data in JSON.",
   "main": "index.js",
   "dependencies": {
     "clone": "^2.1.2"
   },
   "devDependencies": {},
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/hamptonsmith/sejr"
+  },
   "scripts": {
     "test": "node tests/all-tests.js"
   },
